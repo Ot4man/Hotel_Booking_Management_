@@ -1,5 +1,12 @@
 import service.AuthService;
 import java.util.Scanner;
+import model.Room;
+import model.RoomStatus;
+import model.RoomType;
+import service.AuthService;
+
+import java.math.BigDecimal;
+import java.util.Scanner;
 
 public class Main {
 
@@ -9,6 +16,15 @@ public class Main {
         AuthService authService = new AuthService();
 
         boolean running = true;
+
+
+        Room room = new Room("105",RoomStatus.AVAILABLE,new BigDecimal("4000"),4,RoomType.DOUBLE);
+        System.out.println("\n===== ROOM TEST =====");
+        System.out.println("Room number: " + room.getRoomNumber());
+        System.out.println("Type: " + room.getType());
+        System.out.println("Capacity: " + room.getCapacity());
+        System.out.println("Price: " + room.getPricePerNight() + " MAD");
+        System.out.println("Status: " + room.getStatus());
 
         while (running) {
 
@@ -65,6 +81,7 @@ public class Main {
                             loginEmail,
                             loginPassword
                     );
+
 
                     break;
 

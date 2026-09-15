@@ -1,75 +1,61 @@
 package service;
 
 import model.User;
+import repository.UserRepository;
 import util.ValidationUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import exception.EmailAlreadyExistsException;
+import exception.InvalidCredentialsException;
+
+import java.util.Optional;
 
 public class AuthService {
 
-    private List<User> users = new ArrayList<>();
-
+    private UserRepository userRepository;
     private User currentUser;
-
     private ValidationUtils validationUtils = new ValidationUtils();
 
-    public void register(String fullname, String phone, String email, String password) {
+    public AuthService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-        // Validate user data
+    public void register(String fullname, String phone, String email, String password) throws IllegalArgumentException, EmailAlreadyExistsException {
+
         if (!validationUtils.isValidName(fullname)) {
-            System.out.println("Invalid name");
-            return;
+            throw new IllegalArgumentException("Invalid name");
         }
 
         if (!validationUtils.isValidPhone(phone)) {
-            System.out.println("Invalid phone");
-            return;
+            throw new IllegalArgumentException("Invalid phone");
         }
 
         if (!validationUtils.isValidEmail(email)) {
-            System.out.println("Invalid email");
-            return;
+            throw new IllegalArgumentException("Invalid email format");
         }
 
         if (!validationUtils.isValidPassword(password)) {
-            System.out.println("Password must be at least 6 characters");
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
+
+        User user = new User(fullname, phone, email, password);
+
+        userRepository.save(user);
+    }
+
+    public void login(String email, String password) throws InvalidCredentialsException {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isPresent() && optionalUser.get().getPassword().equals(password)) {
+            currentUser = optionalUser.get();
             return;
         }
 
-        // Check if email already exists
-        for (User user : users) {
-            if (user.getEmail().equals(email)) {
-                System.out.println("Email already exists");
-                return;
-            }
-        }
-
-        // Create and save user
-        User user = new User(fullname, phone, email, password);
-
-        users.add(user);
-
-        System.out.println("Registration successful");
-    }
-
-    public void login(String email, String password) {
-
-        for (User user : users) {
-
-            if (user.getEmail().equals(email)
-                    && user.getPassword().equals(password)) {
-
-                currentUser = user;
-
-                System.out.println("Login successful");
-                System.out.println("Welcome " + user.getFullname());
-
-                return;
-            }
-        }
-
-        System.out.println("Invalid email or password");
+        throw new InvalidCredentialsException("Invalid email or password");
     }
 
     public void logout() {
@@ -85,6 +71,47 @@ public class AuthService {
 
     public boolean isLoggedIn() {
         return currentUser != null;
+    }
+
+    public void updateProfile(String fullname, String phone, String email) throws EmailAlreadyExistsException, IllegalArgumentException {
+        if (currentUser == null) {
+            throw new IllegalStateException("No user is currently logged in.");
+        }
+
+        if (!validationUtils.isValidName(fullname)) {
+            throw new IllegalArgumentException("Invalid name");
+        }
+        if (!validationUtils.isValidPhone(phone)) {
+            throw new IllegalArgumentException("Invalid phone");
+        }
+        if (!validationUtils.isValidEmail(email)) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if (!currentUser.getEmail().equals(email)) {
+            if (userRepository.findByEmail(email).isPresent()) {
+                throw new EmailAlreadyExistsException("Email already exists");
+            }
+        }
+
+        currentUser.setFullname(fullname);
+        currentUser.setPhone(phone);
+        currentUser.setEmail(email);
+    }
+
+    public void changePassword(String oldPassword, String newPassword) throws InvalidCredentialsException, IllegalArgumentException {
+        if (currentUser == null) {
+            throw new IllegalStateException("No user is currently logged in.");
+        }
+
+        if (!currentUser.getPassword().equals(oldPassword)) {
+            throw new InvalidCredentialsException("Incorrect old password");
+        }
+        if (!validationUtils.isValidPassword(newPassword)) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+        
+        currentUser.setPassword(newPassword);
     }
 }
 

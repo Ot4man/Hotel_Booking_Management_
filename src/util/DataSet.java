@@ -30,6 +30,6 @@ public class DataSet {
         roomRepository.save(room201);
         roomRepository.save(room202);
 
-        System.out.println("Initial data loaded successfully.");
+        System.out.println("Initial data loaded");
     }
 }

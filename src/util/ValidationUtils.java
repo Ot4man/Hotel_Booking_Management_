@@ -3,7 +3,7 @@ package util;
 public class ValidationUtils {
 
     public boolean isValidName(String name) {
-        return name != null && !name.isBlank() && name.matches("[a-zA-Z]");
+        return name != null && !name.isBlank() && name.matches("^[a-zA-Z]+$");
     }
 
     public boolean isValidEmail(String email) {

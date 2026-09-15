@@ -2,12 +2,12 @@ package model;
 
 import java.math.BigDecimal;
 
-public  class Room {
-private String roomNumber;
-private RoomType type;
-private int capacity;
-private BigDecimal pricePerNight;
-private RoomStatus status;
+public class Room {
+    private String roomNumber;
+    private RoomType type;
+    private int capacity;
+    private BigDecimal pricePerNight;
+    private RoomStatus status;
 
     public Room(String roomNumber, RoomStatus status, BigDecimal pricePerNight, int capacity, RoomType type) {
         this.roomNumber = roomNumber;
@@ -55,5 +55,14 @@ private RoomStatus status;
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Room " + roomNumber + "\n" +
+                "Type: " + type + "\n" +
+                "Capacity: " + capacity + "\n" +
+                "Price/night: " + pricePerNight + " MAD\n" +
+                "Status: " + status + "\n";
     }
 }
